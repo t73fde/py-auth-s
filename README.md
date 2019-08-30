@@ -12,4 +12,4 @@ The easiest way to use this service is to build an docker image and to run it:
 
 Or run it directly:
 
-    PYTHONPATH=. python py_auth_s/main.py
+    python py_auth_s.py
