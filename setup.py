@@ -32,7 +32,7 @@ if __name__ == "__main__":
         ],
         entry_points={
             'console_scripts': [
-                'pyauths = py_auth_s.main:main',
+                'pyauths = py_auth_s:main',
             ],
         }
     )

@@ -2,9 +2,9 @@
 # -*- coding: utf-8 -*-
 
 """
-Unit test for webapp module.
+Unit test.
 
-:copyright: (c) 2016 by Detlef Stern
+:copyright: (c) 2016,2017,2018,2019 by Detlef Stern
 :license: Apache 2.0, see LICENSE
 """
 
@@ -13,7 +13,7 @@ import unittest
 
 import webtest
 
-from py_auth_s import webapp
+from py_auth_s import application, get_auth_data
 
 
 class AuthDataTestCase(unittest.TestCase):
@@ -26,7 +26,7 @@ class AuthDataTestCase(unittest.TestCase):
 
     def check_raw(self, text):
         """Test a raw text for not being able to be decoded."""
-        username, password = webapp.get_auth_data(text)
+        username, password = get_auth_data(text)
         self.assert_auth_error(username, password)
 
     @staticmethod
@@ -37,12 +37,12 @@ class AuthDataTestCase(unittest.TestCase):
 
     def check_encoded(self, text):
         """Test for bad encodings."""
-        username, password = webapp.get_auth_data(self.encode(text))
+        username, password = get_auth_data(self.encode(text))
         self.assert_auth_error(username, password)
 
     def check_valid(self, expected_username, expected_password, text):
         """Test for valid encodings."""
-        username, password = webapp.get_auth_data(self.encode(text))
+        username, password = get_auth_data(self.encode(text))
         self.assertEqual(expected_username, username)
         self.assertEqual(expected_password, password)
 
@@ -76,7 +76,7 @@ class AuthDataTestCase(unittest.TestCase):
     def test_valid_rfc7617(self):
         """Valid values from RFC7671."""
         self.check_valid('Aladdin', 'open sesame', 'Aladdin:open sesame')
-        username, password = webapp.get_auth_data('Basic dGVzdDoxMjPCow==')
+        username, password = get_auth_data('Basic dGVzdDoxMjPCow==')
         self.assertEqual('test', username)
         self.assertEqual('123£', password)
 
@@ -86,7 +86,7 @@ class WebappTest(unittest.TestCase):
 
     def setUp(self):
         """Set up the web app."""
-        self.app = webtest.TestApp(webapp.application)
+        self.app = webtest.TestApp(application)
 
     def test_no_auth(self):
         """Without any authentication, a 401 must be returned."""

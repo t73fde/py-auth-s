@@ -1,12 +1,13 @@
+#!/usr/bin/env python
+
 """
-Authentication proxy for student projects.
+HTTP Basic authentication service for development
 
-WSGI web application.
-
-:copyright: (c) 2016 by Detlef Stern
+:copyright: (c) 2016,2017,2018,2019 by Detlef Stern
 :license: Apache 2.0, see LICENSE
 """
 
+import argparse
 import base64
 import binascii
 import os
@@ -16,36 +17,9 @@ BASIC_AUTH_TEXT = "basic "
 REALM = "Default"
 
 
-def get_passwords():
-    """Try to read password from a file."""
-    file_name = os.environ.get('PWFILE')
-    if file_name is None:
-        return None
-    result = {}
-    try:
-        with open(file_name, 'r') as auth_file:
-            for line in auth_file:
-                data = line.strip().split(':')
-                if len(data) == 2:
-                    result[data[0]] = data[1]
-        return result
-    except FileNotFoundError:
-        return None
-    return None
-
-
-PASSWORD_DICT = get_passwords()
-
-
 def check_password(username, password):
     """Check authorization of user name and password."""
-    if PASSWORD_DICT is not None:
-        return PASSWORD_DICT.get(username, 0) == password
-    if not username or not password:
-        return False
-    if username.startswith("x"):
-        return False
-    return True
+    return username and password and not username.startswith("x")
 
 
 def get_auth_data(authorization):
@@ -82,3 +56,21 @@ def application(environ, start_response):
     else:
         start_response('200 OK', response_headers)
     return []
+
+
+def main():
+    """Test driver."""
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        '-p', '--port', type=int, default=9876,
+        help="port number of web server")
+    args = parser.parse_args()
+
+    from wsgiref.simple_server import make_server
+    print("Listening on port", args.port)
+    server = make_server(host="0.0.0.0", port=args.port, app=application)
+    server.serve_forever()
+
+
+if __name__ == '__main__':
+    main()
